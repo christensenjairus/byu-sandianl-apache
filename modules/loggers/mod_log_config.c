@@ -862,6 +862,27 @@ static const char *log_server_port(request_rec *r, char *a)
     return apr_itoa(r->pool, (int)port);
 }
 
+static const char *log_request_ssl_rtt_microseconds(request_rec *r, char *a)
+{
+    //return apr_psprintf(r->pool, "%ld", (SSL_get_rtt(r->connection)));
+    long rtt = SSL_get_rtt(r->connection);
+    if (rtt < 1)
+        return ap_log_error();
+
+    u_char buf[100];
+    apr_psprintf((char *)buf, "%ld", rtt);
+    apr_size_t len = strlen(buf);
+
+    s->len = len;
+    s->data = apr_pcalloc(pool, len);
+
+    if (s->data == NULL)
+        return ap_log_error; //double check this
+    memcpy(s->data, buf, len);
+
+    return OK;
+}
+
 /* This respects the setting of UseCanonicalName so that
  * the dynamic mass virtual hosting trick works better.
  */
@@ -1887,6 +1908,7 @@ static int log_pre_config(apr_pool_t *p, apr_pool_t *plog, apr_pool_t *ptemp)
         log_pfn_register(p, "r", log_request_line, 1);
         log_pfn_register(p, "D", log_request_duration_microseconds, 1);
         log_pfn_register(p, "T", log_request_duration_scaled, 1);
+        log_pfn_register(p, "S", log_request_ssl_rtt_microseconds, 1);
         log_pfn_register(p, "U", log_request_uri, 1);
         log_pfn_register(p, "s", log_status, 1);
         log_pfn_register(p, "R", log_handler, 1);
