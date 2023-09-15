@@ -466,6 +466,11 @@ static const char *ssl_var_lookup_ssl(apr_pool_t *p, const SSLConnRec *sslconn,
     else if (ssl != NULL && strcEQ(var, "PROTOCOL")) {
         result = SSL_get_version(ssl);
     }
+    else if (ssl != NULL && strcEQ(var, "RTT")) {
+        uint64_t rtt;
+        SSL_get_handshake_rtt((const SSL *) ssl, &rtt);
+        result = apr_psprintf(p, "%" PRId64, rtt);
+    }
     else if (ssl != NULL && strcEQ(var, "SESSION_ID")) {
         char buf[MODSSL_SESSION_ID_STRING_LEN];
         SSL_SESSION *pSession = SSL_get_session(ssl);
@@ -1262,4 +1267,3 @@ static const char *ssl_var_lookup_ssl_compress_meth(SSL *ssl)
 #endif
     return result;
 }
-

@@ -1507,6 +1507,7 @@ static const char *const ssl_hook_Fixup_vars[] = {
     "SSL_PROTOCOL",
     "SSL_SECURE_RENEG",
     "SSL_COMPRESS_METHOD",
+    "SSL_RTT",
     "SSL_CIPHER",
     "SSL_CIPHER_EXPORT",
     "SSL_CIPHER_USEKEYSIZE",
