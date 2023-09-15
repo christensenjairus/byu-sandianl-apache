@@ -273,7 +273,6 @@ const char *ssl_var_lookup(apr_pool_t *p, server_rec *s,
                            const char *var)
 {
     const char *result = NULL;
-    long rtt = 0;
     apr_time_exp_t tm;
 
     /*
@@ -350,7 +349,7 @@ const char *ssl_var_lookup(apr_pool_t *p, server_rec *s,
             else if (strcEQ(var, "AUTH_TYPE"))
                 result = r->ap_auth_type;
             else if (strcEQ(var, "THE_REQUEST"))
-                result = r->the_request
+                result = r->the_request;
             else if (strlen(var) > 4 && strcEQn(var, "ENV:", 4)) {
                 result = apr_table_get(r->notes, var+4);
                 if (result == NULL)
@@ -391,25 +390,6 @@ const char *ssl_var_lookup(apr_pool_t *p, server_rec *s,
             apr_time_exp_lt(&tm, apr_time_now());
             result = apr_psprintf(p, "%02d%02d",
                                  (tm.tm_year / 100) + 19, tm.tm_year % 100);
-        }
-        else if (strcEQ(var, "SSL_RTT")) {
-            rtt = SSL_get_rtt(sslconn);
-            if (rtt < 1)
-                return ap_log_error;
-
-            u_char buf[100];
-            apr_psprintf((char *)buf, "%ld", rtt);
-            apr_size_t len = strlen(buf);
-
-            s->len = len;
-            s->data = apr_pcalloc(pool, len);
-
-            if (s->data == NULL)
-                return ap_log_error;
-            memcpy(s->data, buf, len);
-
-            return OK;
-
         }
 #define MKTIMESTR(format, tmfield) \
             apr_time_exp_lt(&tm, apr_time_now()); \
